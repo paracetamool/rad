@@ -1,0 +1,201 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %} Архив экспертных заключений {% endblock %}
+
+{% block staticCSS %}
+<link rel="stylesheet" href="{% static 'bootstrap-select-1.13.9/css/bootstrap-select.min.css' %}">
+<link rel="stylesheet" href="{% static 'bootstrap-datetimepicker-4.17.47/css/bootstrap-datetimepicker.min.css' %}">
+
+<link rel="stylesheet" href="{% static 'DataTables/datatables.min.css' %}">
+<link rel="stylesheet" href="{% static 'DataTables/Buttons-1.6.1/css/buttons.bootstrap.min.css' %}">
+{% endblock staticCSS %}
+
+{% block staticJS %}
+
+<script type="text/javascript" src="/static/bootstrap-select-1.13.9/js/bootstrap-select.min.js"></script>
+<script type="text/javascript" src="/static/bootstrap-select-1.13.9/js/i18n/defaults-ru_RU.min.js"></script>
+
+<script type="text/javascript" src="/static/js/moment-with-locales.min.js"></script>
+<script type="text/javascript" src="/static/bootstrap-datetimepicker-4.17.47/js/bootstrap-datetimepicker.min.js"></script>
+<script type="text/javascript" src="/static/js/jquery.mask.min.js"></script>
+
+<script type="text/javascript" src="/static/DataTables/DataTables-1.10.20/js/jquery.dataTables.min.js"></script>
+<script type="text/javascript" src="/static/DataTables/DataTables-1.10.20/js/dataTables.bootstrap.min.js"></script>
+<script type="text/javascript" src="/static/DataTables/Buttons-1.6.1/js/dataTables.buttons.min.js"></script>
+<script type="text/javascript" src="/static/DataTables/Buttons-1.6.1/js/buttons.bootstrap.min.js"></script>
+<script type="text/javascript" src="/static/DataTables/JSZip-2.5.0/jszip.min.js"></script>
+<script type="text/javascript" src="/static/DataTables/pdfmake-0.1.36/pdfmake.min.js"></script>
+<script type="text/javascript" src="/static/DataTables/pdfmake-0.1.36/vfs_fonts.js"></script>
+<script type="text/javascript" src="/static/DataTables/Buttons-1.6.1/js/buttons.html5.min.js"></script>
+<script type="text/javascript" src="/static/DataTables/Buttons-1.6.1/js/buttons.print.min.js"></script>
+<script type="text/javascript" src="/static/DataTables/Buttons-1.6.1/js/buttons.colVis.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.22.2/moment.min.js"></script>
+<script src="https://cdn.datatables.net/plug-ins/1.10.19/dataRender/datetime.js"></script>
+
+{% endblock staticJS %}
+
+{% block header %}
+
+    {% if user.is_superuser %}
+    <ul class="nav navbar-nav">
+        <li class=""><a href="/ex/">Экспертизы в работе</a></li>
+        <li class="active"><a href="/arch/">Архив экспертных заключений</a></li>
+        <li class=""><a href="/raz/">Архив разрешений</a></li>
+    </ul>
+    <ul class="nav navbar-nav navbar-right">
+        <li class="dropdown"><a class="dropdown-toggle" data-toggle="dropdown" href="#">
+            <span class="glyphicon glyphicon-user"></span>
+            {{ user.username }}
+            <span class="caret"></span></a>
+            <ul class="dropdown-menu">
+                <li ><a href="/admin/">Администрирование</a></li>
+                <li><a href="{% url 'logout'%}?next={{request.path}}">Выйти</a></li>
+            </ul>
+        </li>
+    </ul>
+    {% else %}
+    <ul class="nav navbar-nav">
+        <li class=""><a href="/ex/">Экспертизы в работе</a></li>
+        <li  class="active"><a href="/arch/">Архив экспертных заключений</a></li>
+        <li class=""><a href="/raz/">Архив разрешений</a></li>
+    </ul>
+    <ul class="nav navbar-nav navbar-right">
+        <li class="dropdown"><a class="dropdown-toggle" data-toggle="dropdown" href="#">
+            <span class="glyphicon glyphicon-user"></span>
+            {{ user.username }}
+            <span class="caret"></span></a>
+            <ul class="dropdown-menu">
+                <li><a href="{% url 'logout'%}?next={{request.path}}">Выйти</a></li>
+            </ul>
+        </li>
+    </ul>
+    {% endif %}
+
+{% endblock header %}
+
+
+{% block content %}
+
+
+<div id="content">
+   <div class="table-responsive">
+        <div id="nav_tabs_clear_all">
+            <button onclick="Clear_all();" style="width:50px;" data-toggle="tooltip" title="Очистить все" type="button" class="btn btn-sm btn-default"> 
+                <span class="glyphicon glyphicon-refresh"></span>
+            </button>
+        </div>
+
+        <div id="nav_tabs_arch"  class="btn-group btn-group-toggle" data-toggle="buttons">
+            <label id="vibros_checkbox" class="btn btn-default btn-sm" data-toggle="tooltip" title="Выбросы радиоактивных веществ" data-placement="bottom" >
+                <input id="" name="" type="checkbox" autocomplete="off" value="0" >
+                Выбросы
+            </label>
+            <label id="sbros_checkbox" class="btn btn-default btn-sm" data-toggle="tooltip" title="Сбросы радиоактивных веществ" data-placement="bottom" >
+                <input id="" name="" type="checkbox" autocomplete="off" value="0" >
+                Сбросы
+            </label>  
+        </div>
+
+        <table id="id_table_raz" class="table table-condensed table-striped table-hover">
+            <thead>
+                <tr>
+                    <th style="text-align:center;" data-orderable="false" >№</th>
+                    <th style="text-align:center;" >Организация</th>
+                    <th style="text-align:center;" >Экспертное заключение</th>
+                    <th style="text-align:center;" >Государственная услуга</th>
+                    <th style="text-align:center;" >Дата утверждения заключения</th>
+                </tr>
+            </thead>
+        </table> </br>
+
+    </div>
+</div>
+<div class="modal fade" id="myModal" role="dialog">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h3 style='text-align:center;' id="name_zagolovok2"></h3>
+                    </div>
+                    <div class="modal-body">
+                        <div class="panel panel-primary">
+                            
+                            <div class="panel-body">
+                                <table id="table-modal1" class="table" >
+                                    <tr style="background-color: #3173ad; border-color: #337ab7;">
+                                        <td style="padding-left:12px; font-size:15px; width:33%; color: #fff;">Информация об экспертизе</td>
+                                        <td style=""></td>
+                                    </tr>
+                                    <tr>
+                                        <th style="width: 370px;">Результат предоставления государственной услуги</th>
+                                        <td id="tip_raz2"></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Дата утверждения</th>
+                                        <td id="vidachi_raz2"></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Кем утверждено заключение</th>
+                                        <td id="utvergdeno_zakl"></td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="panel panel-primary">
+
+                            <div class="panel-body">
+                                <table  class="table">
+                                    <tr style="background-color: #3173ad; border-color: #337ab7;">
+                                        <td style="padding-left:12px; font-size:15px; width:33%; color: #fff;">Документы экспертизы</td>
+                                        <td style="text-align: center;font-size:15px; width:33%; color: #fff;">Запрос</td>
+                                        <td style="text-align: center;font-size:15px; width:33%; color: #fff;">Ответ</td>
+                                    </tr>
+                                    <tr>
+                                        <th style="padding-left:12px;width:33%;">Письмо из Ростехнадзора</th>
+                                        <td style="text-align: center;width:33%;"><a target="_blank" id="pismo_rtn_o_ex2" href="">Письмо_РТН.pdf</a></td>
+                                        <td style="width:33%;"></td>
+                                    </tr>
+                                    <tr>
+                                        <th style="padding-left:12px;width:33%;">ТКП</th>
+                                        <td style="text-align: center;width:33%;"><a target="_blank" id="zapros_tkp2" href="">Запрос_ТКП.pdf</a></td>
+                                        <td style="text-align: center;width:33%;"><a style="vertical-align: middle; padding: 5px;" target="_blank" id="otvet_zapros_tkp2" href="">Ответ_ТКП.pdf</a></td>                               
+                                    </tr>
+
+                                    <tr>
+                                        <th style="padding-left:12px;width:33%;">Заключенный договор</th>
+                                        <td style="text-align: center;width:33%;"><a target="_blank" id="zakl_dogovor2" href="">Заключенный_Договор.pdf</a></td>
+                                        <td style="width:33%;"></td>
+
+                                    </tr>
+                                    <tr>
+                                        <th style="padding-left:12px;width:33%;" >Проект нормативов/   Экспертное заключение</th>
+                                        <td style="text-align: center;width:33%;"><a target="_blank" id="proekt_normat2" href="">Проект_нормативов.pdf</a></td>
+                                        <td style="text-align: center;width:33%;"><a target="_blank" id="ex_zakl" href="">ЭЗ.pdf</a></td>
+                                    </tr>
+
+                                </table>
+                            </div>
+                        </div>
+                        
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+{% endblock content %}
+
+{% block script %}
+<script type="text/javascript">
+    var options = ''
+    '{% for k in name %}'
+        options += '<option id ="{{ k.id_ex }}" class="option_oranization"  >{{ k.name }}</option>'
+    '{% endfor %}'
+</script>
+<script type="text/javascript" src="/static/js/main/date-picker.js"></script>
+<script type="text/javascript" src="/static/js/main/arch/Filterjavascript.js"></script>
+<script type="text/javascript" src="/static/js/main/arch/javascript.js"></script>
+<script type="text/javascript" src="/static/js/main/ex/style.js"></script>
+<script type="text/javascript" src="/static/js/main/tooltipe_main.js"></script>
+{% endblock script %}

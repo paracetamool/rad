@@ -1,0 +1,191 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %} Архив разрешений {% endblock %}
+
+{% block nav %}
+    {% if user.groups.all.0.name != 'Обычный пользователь' %}
+        <li><a href="/ex/">Экспертизы в работе</a></li>
+    {% endif %}
+    <li><a href="/arch/">Архив экспертных заключений</a></li>
+    {% if user.groups.all.0.name != 'Редакторы ПЭО' %}
+        <li class="active"><a href="/raz/">Архив разрешений</a></li>
+    {% endif %}
+{% endblock nav %}
+
+{% block content %}
+
+<div id="content_raz">
+    <div class="table-responsive">
+
+    <div class="container"></div>
+    <div id="opisanie_color1" name=""></div>
+    <div id="opisanie_color2" name=""></div>
+    <div id="opisanie_color3" name=""></div>
+
+    <div id="bt_copy_xl_pdf"></div>
+
+    
+    {% comment %} <div id="nav_tabs_clear_all">
+        <button onclick="Clear_all();" style="width:50px;" data-toggle="tooltip" title="Очистить все" type="button" class="btn btn-sm btn-default"> 
+            <span class="glyphicon glyphicon-refresh"></span>
+        </button>
+    </div> {% endcomment %}
+
+    <div id="nav_tabs_raz" class="btn-group btn-group-toggle" data-toggle="buttons">
+        <label  data-toggle="tooltip" title="Вывести все"  id="id_tip_all" name="active"  class="btn btn-sm btn-default active">
+            <input type="radio" autocomplete="off" value="1">
+            Выбросы и сбросы
+        </label>
+        <label data-toggle="tooltip" title="Выбросы радиоактивных веществ" id="id_tip_vibros"  class="btn btn-sm btn-default ">
+            <input type="radio" autocomplete="off" value="1">
+            Выбросы
+        </label>
+        <label data-toggle="tooltip" title="Сбросы радиоактивных веществ"  id="id_tip_sbros"  class="btn btn-sm btn-default">
+            <input type="radio" autocomplete="off" value="1">
+            Сбросы
+        </label>
+        <div style="display: table;">
+            <div style="width: 150px;" id="dropdown_name_organ">
+                <select  id="id_select_organiz" class="form-control selectpicker label-picker" data-width="100%" data-size="10" data-live-search="true" data-actions-box="true" data-header="Организации" multiple title="Организации">
+                    {% for k in data %}
+                        <option  class="option_oranization" >{{ k.name }}</option>
+                    {% endfor %} 
+                </select>
+            </div>
+
+            <div style="display: table-cell;">
+            
+                <div id="filter-timerange" class="dropdown">
+                    <button  style="color:black;" id="btn_srok_arch" class="btn btn-default dropdown-toggle" data-toggle="dropdown" role="button">
+                        <div id="id_range">Вывести все сроки</div>
+                        <span class="bs-caret"><span class="caret"></span></span>
+                    </button>
+                        <ul style="width:470px" class="dropdown-menu">
+                            <li class="bt_all"><a class="dropdown-item active" href="#">Вывести все сроки</a></li>
+                            <li class="bt_success"><a class="dropdown-item" href="#">Срок до окончания действия разрешения составляет больше года</a></li>
+                            <li class="btn_warning"><a class="dropdown-item" href="#">Срок до окончания действия разрешения составляет меньше года</a></li>
+                            <li class="btn_danger"><a class="dropdown-item" href="#">Срок действия разрешения истек</a></li>
+                        </ul>
+                </div>
+            </div>
+            <div class="btn-group">
+                <button id="Clear_all_raz" data-toggle="tooltip" title="Очистить все" type="button" onclick='Clear_all()' class="btn btn-default"><span class="glyphicon glyphicon-refresh"></span></button>
+            </div> 
+            <div id="div_input_search">
+                <input  class="form-control" id="poisk" type="text" placeholder="Поиск по слову ...">
+            </div>  
+        </div>
+      
+    </div>
+        <table id="id_table_raz" class="table table-condensed table-striped table-hover">
+            <thead>
+                <tr>
+                    <th class="" data-orderable="false">№</th>
+                    <th>№</th>
+                    <th style="text-align:center; width: 22%;">Организация</th>
+                    <th id="th_tip_razr" data-orderable="false">Тип разрешения</th>
+                    <th>Дата начала</th>
+                    <th>Срок окончания</th>
+                    <th>Количество источников</th>
+                    <th style="text-align:center; width: 15%;">Неорганизованные источники</th>
+                    <th data-orderable="false">Разрешение</th>
+                </tr>
+            </thead>
+        </table>
+    </div>
+</div>
+
+<div class="modal fade" id="myModal" role="dialog">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">
+                    <span class="glyphicon glyphicon-remove">
+                    </span>
+                </button>
+                <div style="display:block; float:left;">
+                    <button id="btn_drugie_raz" class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">
+                        История разрешения <span class="caret"></span>
+                    </button>
+                    <ul id="drop_down_raz" class="dropdown-menu"></ul>
+                </div>
+
+                <div>
+                    <h3 style='display:block; float:center; text-align:center;' id="name-zagolovok"></h3>
+                </div>
+
+            </div>
+            <div class="modal-body">
+                <div class="panel-body-div">
+                    <div class="panel panel-primary">
+                        <div class="panel-heading">
+                            Информация о разрешении
+                        </div>
+                        <div class="panel-body">
+                                <p style="text-align:center;font-size:16px;background: #DB6969; color:white;" id="actual"></p>
+                                <table id="table-modal1" class="table">
+                                <tr>
+                                    <th style="width:350px;">Тип разрешения</th>
+                                    <td colspan="3" id="tip_raz"></td>
+                                </tr>
+                                <tr>
+                                    <th>Кем выдано</th>
+                                    <td colspan="3" id="vidano_raz"></td>
+                                </tr>
+                                <tr>
+                                    <th>Дата выдачи</th>
+                                    <td colspan="3" id="vidachi_raz"></td>
+                                </tr>
+                                <tr>
+                                    <th>Дата начала действия</th>
+                                    <td colspan="3" id="nachalo_raz"></td>
+                                </tr>
+                                <tr>
+                                    <th>Дата окончания действия</th>
+                                    <td colspan="3" id="konec_raz"></td>
+                                </tr>
+                                
+                                <tr>
+                                    <th>Проект нормативов</th>
+                                    <td colspan="3"><a target="_blank" id="fayl_proekta_norm" href="">Документ</a></td>
+                                </tr>
+                                <tr>
+                                    <th>Экспертное заключение</th>
+                                    <td colspan="3"><a target="_blank" id="fayl_expertn_zakl" href="">Документ</a></td>
+                                </tr>
+                                <tr>
+                                    <th>Разрешение</th>
+                                    <td colspan="3"><a target="_blank" id="nomer_raz" href=""></a></td>
+                                </tr>
+                                <tr>
+                                    <th style="vertical-align: middle;" rowspan="2">Количество  источников</th>
+                                    <th> Организованные</th>
+                                    <th>Неорганизованные</th>
+                                    <th>Всего</th>
+                                </tr>
+                                <tr>
+                                    <td id="organizovannie_raz"></td>
+                                    <td id="neorganizovannie_raz"></td>
+                                    <td id="vsego_istochnikov_raz"></td>
+                                </tr>
+                                <tr id="tr_prochaya_inf">
+                                    <th>Прочая информация</th>
+                                    <td colspan="3" id="prochaya_inf"></td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}
+
+{% block script %}
+<script type="text/javascript" src="/static/js/main/raz/Filterjavascript_raz.js"></script>
+<script type="text/javascript" src="/static/js/main/raz/javascript.js"></script>
+<script type="text/javascript" src="/static/js/main/ex/style.js"></script>
+<script type="text/javascript" src="/static/js/main/tooltipe_main.js"></script>
+{% endblock script %}

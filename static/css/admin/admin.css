@@ -1,0 +1,24 @@
+h1 {
+    padding-top: 0px;
+}
+
+.grp-module {
+    margin-top: 10px;
+}
+
+div[id$="dtipdocument_set-group"] h2.djn-collapse-handler.grp-collapse-handler,
+div[id$="dtipdocument_set-group"] h2.djn-collapse-handler.grp-collapse-handler~ul.djn-tools.grp-tools,
+div[id$="dtipdocument_set-2-group"] h2.djn-collapse-handler.grp-collapse-handler,
+div[id$="dtipdocument_set-2-group"] h2.djn-collapse-handler.grp-collapse-handler~ul.djn-tools.grp-tools,
+div[id$="jdatadocument_set-group"] h2.djn-collapse-handler.grp-collapse-handler,
+div[id$="jdatadocument_set-group"] h2.djn-collapse-handler.grp-collapse-handler~ul.djn-tools.grp-tools {
+    display: none;
+}
+
+#grp-content .grp-tabular .grp-table.djn-table .grp-thead>.grp-tr>.grp-th {
+    color: #444;
+}
+
+#ui-datepicker-div {
+    z-index: 1000 !important;
+}

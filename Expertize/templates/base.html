@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}{% endblock %}</title>
+
+    <link rel="stylesheet" href="{% static 'bootstrap-3.3.7/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'bootstrap-3.3.7/css/bootstrap-theme.min.css' %}">
+    <link rel="stylesheet" href="{% static 'font-awesome-4.7.0/css/font-awesome.min.css' %}">
+    <link rel="stylesheet" href="{% static 'bootstrap-select-1.13.9/css/bootstrap-select.min.css' %}">
+    <link rel="stylesheet" href="{% static 'bootstrap-datetimepicker-4.17.47/css/bootstrap-datetimepicker.min.css' %}">
+    <link rel="stylesheet" href="{% static 'DataTables/datatables.min.css' %}">
+    <link rel="stylesheet" href="{% static 'DataTables/Buttons-1.6.1/css/buttons.bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/main/style.css' %}">
+    {% block staticCSS %}{% endblock staticCSS %}
+
+    <script type="text/javascript" src="/static/jQuery/jquery-3.5.1.min.js"></script>
+    <script type="text/javascript" src="/static/bootstrap-3.3.7/js/bootstrap.min.js"></script>
+    {% block staticJS %}{% endblock staticJS %}
+    <script type="text/javascript" src="/static/bootstrap-select-1.13.9/js/bootstrap-select.min.js"></script>
+    <script type="text/javascript" src="/static/bootstrap-select-1.13.9/js/i18n/defaults-ru_RU.min.js"></script>
+    <script type="text/javascript" src="/static/js/moment-with-locales.min.js"></script>
+    <script type="text/javascript" src="/static/bootstrap-datetimepicker-4.17.47/js/bootstrap-datetimepicker.min.js"></script>
+    <script type="text/javascript" src="/static/js/jquery.mask.min.js"></script>
+    <script type="text/javascript" src="/static/DataTables/DataTables-1.10.20/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="/static/DataTables/DataTables-1.10.20/js/dataTables.bootstrap.min.js"></script>
+    <script type="text/javascript" src="/static/DataTables/Buttons-1.6.1/js/dataTables.buttons.min.js"></script>
+    <script type="text/javascript" src="/static/DataTables/Buttons-1.6.1/js/buttons.bootstrap.min.js"></script>
+    <script type="text/javascript" src="/static/DataTables/JSZip-2.5.0/jszip.min.js"></script>
+    <script type="text/javascript" src="/static/DataTables/pdfmake-0.1.36/pdfmake.min.js"></script>
+    <script type="text/javascript" src="/static/DataTables/pdfmake-0.1.36/vfs_fonts.js"></script>
+    <script type="text/javascript" src="/static/DataTables/Buttons-1.6.1/js/buttons.html5.min.js"></script>
+    <script type="text/javascript" src="/static/DataTables/Buttons-1.6.1/js/buttons.print.min.js"></script>
+    <script type="text/javascript" src="/static/DataTables/Buttons-1.6.1/js/buttons.colVis.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.22.2/moment.min.js"></script>
+    <script src="https://cdn.datatables.net/plug-ins/1.10.19/dataRender/datetime.js"></script>
+</head>
+<body>
+    {% if user.is_authenticated %}
+    <header>
+        <nav id="header" class="navbar navbar-default navbar-fixed-top">
+            <div class="container-fluid">
+                <a class="navbar-brand"><img src="/static/img/NTC_logo.png" height="45" alt="ИОН ИЯУ"/></a>
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar-main">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbar-main">
+                    <ul class="nav navbar-nav">
+                        {% block nav %}{% endblock nav %}
+                    </ul>
+                    <ul class="nav navbar-nav navbar-right">
+                        <li class="dropdown"><a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                            <span class="glyphicon glyphicon-user"></span>
+                            {% if user.last_name or user.first_name %} {{ user.last_name }} {{ user.first_name  }} {% else %} {{ user.username }} {% endif %}
+                            <span class="caret"></span></a>
+                            <ul class="dropdown-menu">
+                                {% if user.is_superuser %}
+                                <li><a href="/admin/">Администрирование</a></li>
+                                {% endif %}
+                                {% if user.groups.all.0.name != 'Обычный пользователь' and user.groups.all.0.name != 'Руководство ООПЯиРБ' and user.groups.all.0.name != 'Редакторы ПЭО' %}
+                                <li><a target="_blank" href="/admin/Expertize/cexpertiza/add/">Добавить экспертизу</a></li>
+                                {% endif %}
+                                <li><a data-target="#ModalSpravka" data-toggle="modal" href="#id_info">Справочная информация</a></li>
+                                <li><a href="{% url 'logout'%}?next={{request.path}}">Выйти</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+    <main id="wrapper">
+        <div class="modal fade" id="ModalSpravka" role="dialog">
+            <div class="modal-dialog">
+                <div id="modal_spravka" class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">
+                            <span class="glyphicon glyphicon-remove">
+                            </span>
+                        </button>
+                        <h3 style='text-align:center;'>Справочная документация</h3>
+                    </div>
+                    <div class="modal-body" style="height:60vh;">
+                        <div class="panel panel-primary" >
+                            <div style="height:60vh; overflow:auto;">
+                                <table class="table table-striped table-hover" >
+                                    <tr style="background-color: #3173ad; border-color: #337ab7;">
+                                        <td style="font-size:15px; width:33%; color: #fff;">Руководство</td>
+                                        <td  style="font-size:15px; width:70%; color: #fff;"></td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <p>
+                                                <a target="_blank" href="/media/manuals/users_guide.pdf">Руководство пользователя</a>
+                                            </p>
+                                        </td>
+                                        <td>
+                                            <p>
+                                                Информационная система «Информационная система по экспертизе проекта нормативов выбросов и сбросов и по разрешениям на выбросы и сбросы радиоактивных веществ» Руководство пользователя
+                                            </p>    
+                                        </td>
+                                    </tr>
+                                </table>
+                                <table class="table table-striped table-hover" >
+                                    <tr style="background-color: #3173ad; border-color: #337ab7;">
+                                        <td style="font-size:15px; width:33%; color: #fff;">Документы</td>
+                                        <td  style="font-size:15px; width:70%; color: #fff;"></td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <p>
+                                                <a target="_blank" href="/media/manuals/Постановление Правительства РФ от 26_06_2018 N 731  О нормат.pdf"> Постановление Правительства РФ от 26.06.2018 № 731</a>
+                                            </p>
+                                        </td>
+                                        <td>
+                                            <p>
+                                                Правила разработки и установления нормативов допустимых выбросов радиоактивных веществ, нормативов допустимых сбросов радиоактивных веществ, а также выдачи разрешений на выбросы радиоактивных веществ, разрешений на сбросы радиоактивных веществ
+                                            </p>    
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <p>
+                                                <a target="_blank" href="/media/manuals/Постановление Правительства РФ от 06_05_2011 N 352 (ред_ от.pdf">Постановление Правительства РФ от 06.05.2011 № 352</a>
+                                            </p>
+                                        </td>
+                                        <td>
+                                            <p>
+                                                Правила определения размера платы за оказание услуг, которые являются необходимыми и обязательными для предоставления федеральными органами исполнительной власти, органами государственных внебюджетных фондов, государственными корпорациями, наделенными в соответствии с федеральными законами полномочиями по предоставлению государственных услуг в установленной сфере деятельности, государственных услуг
+                                            </p> 
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <p>
+                                                <a target="_blank" href="/media/manuals/Приказ Ростехнадзора от 06_05_2020 N 181  Об утверждении Админ.pdf">Приказ Ростехнадзора от 06.05.2020 № 181</a>
+                                            </p>
+                                        </td>
+                                        <td>
+                                            <p>
+                                                Административный регламент Федеральной службы по экологическому, технологическому и атомному надзору предоставления государственной услуги по выдаче разрешений на выбросы и сбросы радиоактивных веществ в окружающую среду
+                                            </p> 
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <p>
+                                                <a target="_blank" href="/media/manuals/Приказ Ростехнадзора от 14_05_2019 N 182  Об утверждении Пор.pdf">Приказ Ростехнадзора от 14.05.2019 № 182</a>
+                                            </p>
+                                        </td>
+                                        <td>
+                                            <p>
+                                                Порядок ведения реестра выданных разрешений на выбросы радиоактивных веществ в атмосферный воздух и разрешений на сбросы радиоактивных веществ в водные объекты
+                                            </p> 
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <p>
+                                                <a target="_blank" href="/media/manuals/Приказ Ростехнадзора от 14_05_2019 N 183  Об утверждении Пор.pdf">Приказ Ростехнадзора от 14.05.2019 № 183</a>
+                                            </p>
+                                        </td>
+                                        <td>
+                                            <p>
+                                                Порядок проведения экспертизы проекта нормативов допустимых выбросов радиоактивных веществ в атмосферный воздух, проекта нормативов допустимых сбросов радиоактивных веществ в водные объекты
+                                            </p> 
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <p>
+                                                <a target="_blank" href="/media/manuals/Приказ Ростехнадзора от 14_05_2019 N 184  Об утверждении Мет.pdf">Приказ Ростехнадзора от 14.05.2019 № 184</a>
+                                            </p>
+                                        </td>
+                                        <td>
+                                            <p>
+                                                Методика определения размера платы за оказание необходимой и обязательной услуги по проведению экспертизы проекта нормативов допустимых выбросов радиоактивных веществ в атмосферный воздух и (или) проекта нормативов допустимых сбросов радиоактивных веществ в водные объекты на предмет их разработки в соответствии с пунктом 26 Правил разработки и устанолвения нормативов допустимых выбросов радиоактивных веществ, нормативов допустимых сбросов радиоактивных веществ, а также выдачи разрешений на выбросы радиоактивных веществ, разрешений на сбросы радиоактивных веществ утвержденных ПП РФ от 26.06.2018 № 731
+                                            </p> 
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <p>
+                                                <a target="_blank" href="/media/manuals/Об утверждении Методики определения размера платы по проведению.pdf">Приказ Ростехнадзора от 25.01.2019 № 4</a>
+                                            </p>
+                                        </td>
+                                        <td>
+                                            <p>
+                                                Об утверждении Методики определения размера платы за оказание услуги по проведению экспертизы проекта нормативов допустимых выбросов радиоактивных веществ в атмосферный воздух и (или) проекта нормативов допустимых сбросов радиоактивных веществ в водные объекты
+                                            </p> 
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                            
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        {% block content %}{% endblock %}
+    </main>
+    {% include 'footer.html' %}
+
+    {% else %}
+    <a href="{% url 'login'%}">Войти.</a>
+    {% endif %}
+</body>
+{% block script %}{% endblock script %}
+</html>

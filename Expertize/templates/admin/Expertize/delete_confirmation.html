@@ -1,0 +1,9 @@
+{% extends "admin/delete_confirmation.html" %}
+
+{% block user-tools %}
+{% if request.user.is_superuser %}{{ block.super }}{% endif %}
+{% endblock %}
+
+{% block breadcrumbs %}
+{% if request.user.is_superuser %}{{ block.super }}{% endif %}
+{% endblock %}

@@ -1,0 +1,276 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %} Экспертизы в работе {% endblock %}
+
+{% block nav %}
+    {% if user.groups.all.0.name != 'Обычный пользователь' %}
+        <li class="active"><a href="/ex/">Экспертизы в работе</a></li>
+    {% endif %}
+    <li><a href="/arch/">Архив экспертных заключений</a></li>
+    {% if user.groups.all.0.name != 'Редакторы ПЭО' %}
+        <li><a href="/raz/">Архив разрешений</a></li>
+    {% endif %}
+{% endblock nav %}
+
+{% block content %}
+<content id="cont_ex_main">
+
+<div id="opisanie_color1" name=""></div>
+<div id="opisanie_color2" name=""></div>
+<div id="opisanie_color3" name=""></div>
+
+<div id="content_ex" class="content_ex">
+    <div class="table-responsive">
+        <div id="bt_copy_xl_pdf"></div>
+
+        <div id="nav_tabs_exp" class="btn-group btn-group-toggle" data-toggle="buttons">
+            <label  data-toggle="tooltip" title="Вывести все"  id="id_tip_all" name=""  class="btn btn-sm btn-default active">
+                <input id="" name="" type="checkbox" autocomplete="off" value="1">
+                Выбросы и сбросы
+            </label> 
+            <label name="" id="vibros_checkbox" class="btn btn-default btn-sm" data-toggle="tooltip" title="Выбросы радиоактивных веществ" >
+                    <input id="" name="" type="checkbox" autocomplete="off" value="0">
+                    Выбросы
+                </label>
+                <label name="" id="sbros_checkbox" class="btn btn-default btn-sm" data-toggle="tooltip" title="Сбросы радиоактивных веществ">
+                    <input id="" name="" type="checkbox" autocomplete="off" value="0">
+                    Сбросы
+                </label>
+                <div class="btn-group" id ="div_ex_1">
+                    
+                    <div id="filter-timerange" class="dropdown">
+                        <button  id="btn_srok_arch" class="btn btn-default dropdown-toggle" data-toggle="dropdown" role="button" title="Вывести все сроки">
+                            <div id="id_range">Вывести все сроки</div>
+                            <span class="bs-caret"><span class="caret"></span></span>
+                        </button>
+                            <ul style="width:470px" class="dropdown-menu">
+                                <li class="bt_all"><a class="dropdown-item active" href="#">Вывести все сроки</a></li>
+                                <li class="bt_success"><a class="dropdown-item" href="#">Осталось более половины срока</a></li>
+                                <li class="btn_warning"><a class="dropdown-item" href="#">Осталось менее половины срока</a></li>
+                                <li class="btn_danger"><a class="dropdown-item" href="#">Осталось менее недели</a></li>
+                            </ul>
+                    </div>
+                </div>
+
+            <div id="nav_tabs_rabota_ex" class="btn-group btn-group-toggle" data-toggle="buttons">
+                <label style="height:34px; width:33%;padding-top:7px;" id="vse_ex" name="active" class="btn btn-sm btn-default active" onclick="Vse_ex();" data-toggle="tooltip" title="Все экспертизы">
+                    <input id="" name="" type="radio" autocomplete="off" value="-1">
+                    Все
+                </label>
+                <label style="height:34px; width:33%;padding-top:7px;" id="otvet_ex" name="" class="btn btn-sm btn-default " onclick="Otvet_ex();" data-toggle="tooltip" title='Экспертизы в работе'>
+                    <input id="" name="" type="radio" autocomplete="off" value="0">
+                    В работе
+                </label>
+                <label style="height:34px; width:34%;padding-top:7px;" id="zapros_ex" name=""  class="btn btn-sm btn-default" onclick="Zapros_ex();" data-toggle="tooltip" title='Ожидается запрос от организации'>
+                    <input id="" name="" type="radio" autocomplete="off" value="1">
+                    Ожидание
+                </label>
+            </div>
+
+            <button id="Clear_all_ex" type="button" onclick= 'Clear_all_ex()' class="btn btn-default" data-toggle="tooltip" title="Очистить все фильтры"><span class="glyphicon glyphicon-refresh"></span></button>
+        </div>
+        <table id="id_table_raz" class="table table-condensed table-striped table-hover">
+            <thead>
+                <tr>
+                    <th style="text-align: center;" class="" data-orderable="false">№</th>
+                    <th style="text-align: center;">Организация</th>
+                    <th style="text-align: center;">Государственная услуга</th>
+                    <th style="text-align: center;">Этап работы</th>
+                    <th style="text-align: center;">Срок</th>
+                </tr>
+            </thead>
+        </table></br>
+    </div>
+</div>
+
+<div class="modal fade" id="myModal" role="dialog">
+    <div class="modal-dialog modal-lg">
+        <div id="modal_content_ex" class="modal-content">
+            <div class="modal-header">
+                {% if user.is_staff %}
+                <div style="float:left;">
+                    <a href='' class='block' id="redact_id">
+                        <button id="redact_expertizi" type="button"  class="btn btn-default btn-sm" data-toggle="tooltip" title="Редактировать"><span class="glyphicon glyphicon-pencil"></span></button>
+                    </a>
+                </div>
+                {% endif %}
+                <button type="button" class="close" data-dismiss="modal">
+                    <span class="glyphicon glyphicon-remove">
+                        
+                    </span>
+                </button>
+                <h3 style='text-align:center;' id="title_name"></h3>
+            </div>
+            <div id="modal_body" class="modal-body" style="overflow-y:hidden;">
+                <ul class="nav nav-pills" style='margin:8px;'>
+                    <li id="nav_pills_expertiza" class="active"><a data-toggle="pill" href="#menu1">Экспертиза</a></li>
+                    <li id="nav_pills_process"><a data-toggle="pill" href="#menu2">Процесс</a></li>
+                </ul>
+                <div id="modal_body_inner" style="height:90%;">
+                    <div class="tab-content">
+                        <div id="menu1" class="tab-pane fade in active">
+                            <div class="panel panel-primary">
+
+                                <div class="panel-body">
+                                    <p class="not_p_eror" id="errors">В сведениях есть ошибки, пожалуйста, просмотрите все сведения ниже и исправьте!</p>
+                                    <table class="table">
+                                        <tr style="background-color: #3173ad; border-color: #337ab7;">
+                                            <td style="font-size:15px; width:10%; color: #fff;">Информация об экспертизе</td>
+                                            <td colspan="3" style="font-size:15px; width:33%; color: #fff;"></td>
+                                            
+                                        </tr>
+                                        <tr>
+                                            <th>Тип разрешения</th>
+                                            <td colspan="3" id="tip_ex"></td>
+                                        </tr>
+                                        <tr id ='kem_utvergdeno'>
+                                            <th>Кем утверждено заключение</th>
+                                            <td colspan="3" id="utvergdeno_raboti"></td>
+                                        </tr>
+                                        <tr id ='tr_ruk_podrazdel'>
+                                            <th>Руководитель ответственного подразделения</th>
+                                            <td colspan="3" id="rukovoditel_podrazdeleniya"></td>
+                                        </tr>
+                                        <tr id ='tr_ruk_expertizi'>
+                                            <th>Руководитель экспертизы</th>
+                                            <td colspan="3" id="rukovoditel_raboti"></td>
+                                        </tr>
+                                        <tr id ='tr_experti'>
+                                            <th>Эксперты</th>
+                                            <td colspan="3" id="experti_raboti"></td>
+                                        </tr>
+                                        <tr>
+                                            <th style="vertical-align:middle;" valign="middle" rowspan="2">Количество источников</th>
+                                            <th style=" text-align: center; ">Организованные</th>
+                                            <th style=" text-align: center; ">Неорганизованные</th>
+                                            <th style=" text-align: center; ">Всего</th>
+                                        </tr>
+                                        <tr>
+                                            <td style=" text-align: center;" id="organizovannie_ex"></td>
+                                            <td style=" text-align: center; " id="neorganizovannie_ex"></td>
+                                            <td style=" text-align: center; " id="vsego_istochnikov_ex"></td>
+                                        </tr>
+                                        <tr>
+                                            <th>Дата утверждения заключения</th>
+                                            <td colspan="3" id="konec_ex"></td>
+                                        </tr>
+                                        
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="panel panel-primary">
+                                <div class="panel-body">
+                                    <table class="table">
+                                        <tr style="background-color: #3173ad; border-color: #337ab7;">
+                                            <td style="font-size:15px; width:33%; color: #fff;">Требуемое действие</td>
+                                            <td style="font-size:15px; width:33%; color: #fff;"></td>
+                                            <td style="font-size:15px; width:33%; color: #fff;"></td>
+                                        </tr>
+                                        <tr>
+                                            <td colspan="3" id="tip_deystviya"></td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+        
+                            <div class="panel panel-primary">
+                                <div class="panel-body">
+                                    <table class="table">
+                                        <tr style="background-color: #3173ad; border-color: #337ab7;">
+                                            <td style="font-size:15px; width:33%; color: #fff;"></td>
+                                            <td style="text-align: center;font-size:15px; width:33%; color: #fff;">Запрос</td>
+                                            <td style="text-align: center;font-size:15px; width:33%; color: #fff;">Ответ</td>
+                                        </tr>
+                                        <tr>
+                                            <th style="width:33%;">Письмо из / в Ростехнадзор</th>
+                                            <td style="text-align: center;width:33%;" id="pismo_rtn_o_ex"></td>
+                                            <td style="text-align: center;width:33%;" id="pismo_v_rtn"></td>
+                                        </tr>
+                                        <tr>
+                                            <th rowspan="2" style="vertical-align:middle;width:33%;" id="th_pismo_org_o_ex">Письмо из / в организацию</th>
+                                            <td rowspan="2" style="text-align: center;width:33%;" id="pismo_org_o_ex"></td>
+                                            <td style="text-align: center;width:33%;" id="pismo_v_org"></td>
+                                        </tr>
+                                        <tr id="pismo_garant">
+                                            <td style="text-align: center;width:33%;" id="td_pismo_garant"> Письмо в организацию по гарантийному</td>
+                                        </tr>
+                                        <tr>
+                                            <th style="width:33%;">ТКП</th>
+                                            <td style="text-align: center;width:33%;" id="zapros_tkp"></td>
+                                            <td style="text-align: center;width:33%;" id="otvet_zapros_tkp"></td>                               
+                                        </tr>
+                                        <tr id="tr_proekt_dogovora">
+                                            <th style="width:33%;">Проект договора и ТЗ</th>
+                                            <td style="text-align: center;width:33%;" id="proekt_dogov_TZ"></td>
+                                            <td style="text-align: center;width:33%;" id="otvet_proekt_dogov_TZ"></td>
+                                        </tr>
+                                        <tr id="snigenie_cen">
+                                            <th style="width:33%;">Снижение цены</th>
+                                            <td style="text-align: center;width:33%;" id="zapros_snig_cen"></td>
+                                            <td style="text-align: center;width:33%;" id="otvet_snig_cen"></td>
+                                        </tr>
+                                        <tr id="tr_garant_pismo">
+                                            <th style="width:33%;">Гарантийное письмо</th>
+                                            <td  colspan="2" style="text-align: center;width:33%;" id="garant_pismo"></td>
+                                        </tr>
+                                        <tr>
+                                            <th style="width:33%;">Заключенный договор / Акт</th>
+                                            <td style="text-align: center;width:33%;" id="zakl_dogovor"></td>
+                                            <td style="text-align: center;width:33%;" id="akt"></td>
+                                        </tr>
+                                        <tr>
+                                            <th style="width:33%;">Проект нормативов / Экспертное заключение </th>
+                                            <td style="text-align: center;width:33%;" id="proekt_normat"></td>
+                                            <td style="text-align: center;width:33%;"><a target="_blank" id="ex_zakl_pismo_RTN" href="">Документ</a></td>
+                                        </tr>
+                                        
+                                    </table>
+                                </div>
+                            </div>
+        
+                            <div class="panel panel-primary" id="block_prochie_dok">
+                                <div class="panel-body">
+                                    <table class="table">
+                                        <tr style="background-color: #3173ad; border-color: #337ab7;">
+                                            <td style="font-size:15px; width:33%; color: #fff;">Прочие документы по экспертизе</td>
+                                            <td style="font-size:15px; width:33%; color: #fff;"></td>
+                                            <td style="font-size:15px; width:33%; color: #fff;"></td>
+                                        </tr>
+                                        <tr>
+                                            <th style="width:33%;">Служебные записки</th>
+                                            <td colspan="2" id="sluzhebki"></td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+        
+                        </div>
+                        <div id="menu2" class="tab-pane fade">
+                            <table id="table_process_istorii" class="table table-striped table-hover" style="margin:0;">
+                                <thead>
+                                    <tr>
+                                        <th style="width:180px;">Дата выполнения</th>
+                                        <th style="width:300px;">Исполнитель</th>
+                                        <th>Действие</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="table_tbody_actions"></tbody>
+                            </table>
+                            <p id="p_process_istorii" style="display:none;">У данной экспертизы нет истории изменения</p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</content>
+{% endblock content %}
+
+{% block script %}
+<script type="text/javascript" src="/static/js/main/ex/javascript.js"></script>
+<script type="text/javascript" src="/static/js/main/ex/style.js"></script>
+<script type="text/javascript" src="/static/js/main/tooltipe_main.js"></script>
+{% endblock script %}

@@ -1,0 +1,131 @@
+/* ------Корректировка конфликта grappeli и bootstrap------- */
+html {
+    font-size: 12px;
+}
+
+body {
+    font-size: 100%;
+    line-height: 16px;
+    color: #444;
+}
+
+.h1, .h2, .h3, h1, h2, h3 {
+    margin-top: 0;
+    margin-bottom: 0;
+    font-weight: 700;
+}
+
+.h2, h2 {
+    font-size: 13px;
+    line-height: 18px;
+}
+
+.h3, h3 {
+    font-size: 12px;
+    line-height: 16px;
+}
+
+.grp-group {margin: 0;}
+
+/* -----------------------------Медиа----------------------- */
+@media (min-width: 1200px) {
+    .g-d-c {
+        max-width: calc(75% + 90px);
+    }
+}
+
+@media (min-width: 992px) and (max-width: 1199px) {
+    .g-d-c {
+        max-width: 991px;
+    }
+}
+
+@media (max-width: 991px) {
+    .g-d-c {
+        max-width: initial;
+    }
+}
+
+#grp-content {
+    padding-bottom: 0;
+    padding-inline: 0;
+}
+
+#grp-content-container > .g-d-c {
+    width: 100%;
+    display: grid;
+    margin: auto;
+    grid-template-columns: minmax(400px, 3fr) 5fr 0px;
+    column-gap: 1rem;
+}
+
+#grp-content-container > .g-d-c > div {
+    width: initial;
+}
+
+#users-list .form-control {-webkit-appearance: auto;}
+
+#charts .tab-content .btn-group {
+    float: right;
+}
+
+.table-responsive {
+    display: inline;
+}
+
+#charts .tab-content>div>div>div {
+    width: inherit;
+    display: inline-flex;
+}
+
+#charts .tab-content>div>div {
+    height: 25px;
+    margin: 0;
+}
+
+#charts .form-control {
+    height: 25px;
+    padding: 4px 28px 4px 5px;
+    line-height: 14px;
+    font-size: 12px;
+}
+
+#charts .tab-content {
+    padding-top: 0.5rem;
+}
+
+.chart-loading {
+    position: relative;
+    top: -66px;
+    width: 100%;
+    transition: 0.3s;
+    background: linear-gradient(90deg, rgb(255, 255, 255) 0%, rgba(255, 255, 255, 0.267) 2%, rgba(255, 255, 255, 0.267) 98%, rgb(255, 255, 255) 100%), linear-gradient(0deg, rgb(255, 255, 255) 0%, rgba(255, 255, 255, 0.267) 5%, rgba(255, 255, 255, 0.267) 95%, rgb(255, 255, 255) 100%);
+    z-index: -1;
+    opacity: 0;
+}
+
+.chart-loading.active {
+    z-index: initial;
+    opacity: 1;
+}
+
+#users-list table th,
+#users-list table td:nth-child(1),
+#users-list table td:nth-child(5),
+#users-list table td:nth-child(6) {
+    text-align: center;
+}
+
+.custom-group {
+    display: flex;
+    float: right;   
+}
+
+.custom-group input {
+    width: 25px;
+    height: 25px;
+}
+
+.refresh-icon {
+    padding: 3px 7px;
+}

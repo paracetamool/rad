@@ -1,0 +1,36 @@
+{% load static %}
+{% block module_content %}
+<div id="charts">
+    <ul class="nav nav-tabs">
+        {% for chart in module.charts %}
+        <li><a data-toggle="tab" href="#{{ chart.id }}">{{ chart.tab }}</a></li>
+        {% endfor %}
+    </ul>
+    <div class="tab-content">
+        {% for chart in module.charts %}
+        <div id="{{ chart.id }}" class="tab-pane fade">
+            <div>
+                <div>
+                    <input class="form-control" name="datepicker" autocomplete="off">
+                </div>
+                <div class="btn-group">
+                    <select class="form-control" name="user_type">
+                        <option value="Все">Все</option>
+                        {% for elem in module.user_type %}
+                        <option value="{{ elem }}">{{ elem }}</option>
+                        {% endfor %}
+                    </select>
+                    <button class="btn-default refresh-icon" name="refresh_btn" title="Обновить" width="34" height="34">
+                        <span class="fa fa-refresh" aria-hidden="true"></span>
+                    </button>
+                </div>
+            </div>
+            <div style="margin-top: 1%;">
+                <canvas width="100%" height="40%"></canvas>
+            </div>
+        </div>
+        {% endfor %}
+        <div class="chart-loading"></div>
+    </div>
+</div>
+{% endblock %}

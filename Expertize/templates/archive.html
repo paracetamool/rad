@@ -1,0 +1,267 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %} Архив экспертных заключений {% endblock %}
+
+{% block staticJS %}
+<script src="//code.jquery.com/jquery-1.10.2.js"></script>
+{% endblock staticJS %}
+
+{% block nav %}
+    {% if user.groups.all.0.name != 'Обычный пользователь' %}
+        <li><a href="/ex/">Экспертизы в работе</a></li>
+    {% endif %}
+    <li class="active"><a href="/arch/">Архив экспертных заключений</a></li>
+    {% if user.groups.all.0.name != 'Редакторы ПЭО' %}
+        <li><a href="/raz/">Архив разрешений</a></li>
+    {% endif %}
+{% endblock nav %}
+
+{% block content %}
+<div id="content">
+    <div class="table-responsive">
+        <div id="bt_copy_xl_pdf"></div>
+        
+        <div id="nav_tabs_arch" class="btn-group btn-group-toggle" data-toggle="buttons">
+            <label data-toggle="tooltip" title="Вывести все" id="all_checkbox" class="btn btn-default btn-sm active" data-placement="bottom">
+                <input id="" name="" type="radio" autocomplete="off" value="0">
+                    Выбросы и сбросы
+            </label>
+            <label data-toggle="tooltip" title="Выбросы радиоактивных веществ" id="vibros_checkbox" class="btn btn-default btn-sm"  data-placement="bottom">
+                <input id="" name="" type="radio" autocomplete="off" value="0">
+                    Выбросы
+            </label>
+            <label data-toggle="tooltip" title="Сбросы радиоактивных веществ" id="sbros_checkbox" class="btn btn-default btn-sm" data-placement="bottom">
+                <input  id="" name="" type="radio" autocomplete="off" value="0">
+                    Сбросы
+            </label>
+            <div style="display: table;">
+                <div style="width: 150px;" id="dropdown_name_organ">
+                    <select  id="id_select_organiz" class="form-control selectpicker label-picker" data-width="100%" data-size="10" data-live-search="true" data-actions-box="true" data-header="Организации" multiple title="Организации">
+                        {% for k in name %}
+                            <option class="option_oranization"  id ="{{ k.id_ex }}" >{{ k.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div style="display: table-cell;">
+
+                    <div style="display: table-cell;">
+                        <div id="filter-timerange" class="dropdown">
+                            <button  style="color:black;" id="btn_srok_arch" class="btn btn-default dropdown-toggle" data-toggle="dropdown" role="button">
+                                <div id="id_range">Временной интервал</div>
+                                <span class="bs-caret"><span class="caret"></span></span>
+                            </button>
+                            <div id="Arch_dropdown_data"  class="dropdown-menu">
+                                <div  class="bs-searchbox">
+
+                                    <div id="btn_group_srok" class="btn-group btn-group-toggle" data-toggle="buttons">
+                                        <label id="god_checkbox" name='active' class="btn btn-default btn-sm active"  data-placement="bottom">
+                                            <input id="" name="" type="radio" autocomplete="off" value="0">
+                                                Года
+                                        </label>
+                                        <label id="den_checkbox" class="btn btn-default btn-sm" data-placement="bottom">
+                                            <input  id="" name="" type="radio" autocomplete="off" value="0">
+                                                Дни
+                                        </label>
+                                        <label id="clear_data_checkbox" class="btn btn-default btn-sm" data-placement="bottom">
+                                            <input  id="" name="" type="radio" autocomplete="off" value="0">
+                                                Очистить
+                                        </label>
+                                    </div>
+
+                                    <table>
+                                    
+                                        <tr style="display:none" id = 'tr_data_day'>
+                                            <td><input id="id_input_start_day"  class="form-control" autocomplete="off"></td>
+                                            <td><input id="id_input_end_day" class="form-control"  autocomplete="off"></td>
+                                        </tr>
+                                        <tr id = 'tr_data_year'>
+                                            <td><input id="id_input_start_year"  class="form-control" autocomplete="off"></td>
+                                            <td><input id="id_input_end_year" class="form-control"  autocomplete="off"></td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                
+                </div>
+                <div class="btn-group">
+                    <button id="Clear_all_arch"  data-toggle="tooltip" title="Очистить все" type="button" onclick='Clear_all()' class="btn btn-default"><span class="glyphicon glyphicon-refresh"></span></button>
+                </div> 
+                <div id="div_input_search">
+                    <input  class="form-control" id="poisk" type="text" placeholder="Поиск по слову ...">
+                </div>
+            </div>
+        </div>
+
+            <table id="id_table_raz" class="table table-condensed table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th style="text-align:center;" data-orderable="false">№</th>
+                        <th style="text-align:center; width: 22%;">Организация</th>
+                        <th style="text-align:center;">Экспертное заключение</th>
+                        <th style="text-align:center;">Государственная услуга</th>
+                        <th>Количество источников</th>
+                        <th style="text-align:center; width: 15%;">Неорганизованные источники</th>
+                        <th style="text-align:center;">Дата утверждения заключения</th>
+                    </tr>
+                </thead>
+            </table> </br>
+
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="myModal" role="dialog">
+    <div class="modal-dialog modal-lg">
+        <div style="height: 70vh;" class="modal-content">
+            <div class="modal-header">
+                {% if user.is_staff %}
+                {% if user.groups.all.0.name == 'Редакторы ПЭО' %}
+                {% else %}
+                <div style="float:left;">
+                    <a href='' class='block' id="redact_id">
+                        <button id="redact_expertizi" type="button"  class="btn btn-default btn-sm"><span class="glyphicon glyphicon-pencil"></span></button>
+                    </a>
+                </div>
+                {% endif %}
+                {% endif %}
+                <button style="font-size:20px;" type="button" class="close" data-dismiss="modal">
+                    <span class="glyphicon glyphicon-remove">
+                
+                    </span>
+                </button>
+                <div style=" display: block;">
+                    <h3 style='margin-right: 50px;margin-left: 50px; text-align:center;' id="name_zagolovok2"></h3>
+                </div>
+            </div>
+            <div id="modal_body" class="modal-body" style="overflow-y:hidden;">
+                <ul class="nav nav-pills" style='margin:8px;'>
+                    <li id="nav_pills_expertiza" class="active"><a data-toggle="pill" href="#menu1">Экспертиза</a></li>
+                    <li id="nav_pills_process"><a data-toggle="pill" href="#menu2">Процесс</a></li>
+                </ul>
+                <div id="modal_body_inner" style="height:90%;">
+                    <div class="tab-content">
+                        <div id="menu1" class="tab-pane fade in active">
+                            <div class="panel panel-primary">
+
+                                <div class="panel-body">
+                                    <table id="table-modal1" class="table">
+                                        <tr style="background-color: #3173ad; border-color: #337ab7;">
+                                            <td style="padding-left:12px; font-size:15px; width:33%; color: #fff;">Информация об экспертизе</td>
+                                            <td colspan="3"></td>
+                                        </tr>
+                                        <tr>
+                                            <th style="width: 370px;">Тип разрешения</th>
+                                            <td colspan="3" id="tip_raz2"></td>
+                                        </tr>
+                                        <tr>
+                                            <th>Дата утверждения</th>
+                                            <td colspan="3" id="vidachi_raz2"></td>
+                                        </tr>
+                                        <tr>
+                                            <th>Кем утверждено заключение</th>
+                                            <td colspan="3" id="utvergdeno_zakl"></td>
+                                        </tr>
+                                        <tr>
+                                            <th>Руководитель ответственного подразделения</th>
+                                            <td colspan="3" id="ruk_podrazdel"></td>
+                                        </tr>
+                                        <tr>
+                                            <th>Руководитель работы</th>
+                                            <td colspan="3" id="ruk_raboti"></td>
+                                        </tr>
+                                        <tr>
+                                            <th>Эксперты</th>
+                                            <td colspan="3" id="experti"></td>
+                                        </tr>
+                                        <tr>
+                                            <th style="vertical-align:middle;" valign="middle" rowspan="2">Количество источников</th>
+                                            <th style=" text-align: center; width:100px;">Организованные</th>
+                                            <th style=" text-align: center; width:100px;">Неорганизованные</th>
+                                            <th style=" text-align: center; width:100px;">Всего</th>
+                                        </tr>
+                                        <tr>
+                                            <td style=" text-align: center;" id="organizovannie_ex"></td>
+                                            <td style=" text-align: center; " id="neorganizovannie_ex"></td>
+                                            <td style=" text-align: center; " id="vsego_istochnikov_ex"></td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <div class="panel panel-primary">
+                                <div class="panel-body">
+                                    <table  class="table">
+                                        <tr style="background-color: #3173ad; border-color: #337ab7;">
+                                            <td style="padding-left:12px; font-size:15px; width:33%; color: #fff;">Документы экспертизы</td>
+                                            <td style="text-align: center;font-size:15px; width:33%; color: #fff;">Запрос</td>
+                                            <td style="text-align: center;font-size:15px; width:33%; color: #fff;">Ответ</td>
+                                        </tr>
+                                        <tr id = 'admin_rtn'>
+                                            <th style="padding-left:12px;width:33%;">Письмо из / в Ростехнадзор</th>
+                                            <td style="text-align: center;width:33%;" id="pismo_rtn_o_ex2"></td>
+                                            <td style="text-align: center;width:33%;" id="pismo_v_rtn"></td>
+                                        </tr>
+                                        <tr id ='admin_org'>
+                                            <th style="padding-left:12px;width:33%;">Письмо из / в Организации</th>
+                                            <td style="text-align: center;width:33%;" id="pismo_org"></td>
+                                            <td style="text-align: center; width:33%;" id="pismo_v_org"></td>
+                                        </tr>
+                                        <tr  id ='admin_tkp'>
+                                            <th style="padding-left:12px;width:33%;">ТКП</th>
+                                            <td style="text-align: center;width:33%;" id="zapros_tkp2"></td>
+                                            <td style="text-align: center;width:33%;" id="otvet_zapros_tkp2"></td>                               
+                                        </tr>
+
+                                        <tr>
+                                            <th style="padding-left:12px;width:33%;">Договор / Акт</th>
+                                            <td style="text-align: center;width:33%;" id="zakl_dogovor2"></td>
+                                            <td style="text-align: center;width:33%;" id="act_sdacha-priem2"></td>
+
+                                        </tr>
+                                        <tr>
+                                            <th style="padding-left:12px;width:33%;">Проект нормативов /   Экспертное заключение</th>
+                                            <td style="text-align: center;width:33%;" id="proekt_normat2"></td>
+                                            <td style="text-align: center;width:33%;" id="ex_zakl"></td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="menu2" class="tab-pane fade">
+                            <table id="table_process_istorii" class="table table-striped table-hover" style="margin:0;">
+                                <thead>
+                                    <tr>
+                                        <th style="width:180px;">Дата выполнения</th>
+                                        <th style="width:300px;">Исполнитель</th>
+                                        <th>Действие</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="table_tbody_actions"></tbody>
+                            </table>
+                            <p id="p_process_istorii" style="display:none;">У данной экспертизы нет истории изменения</p>
+                        </div>         
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+
+{% block script %}
+<script type="text/javascript">
+    var options = ''
+    '{% for k in name %}'
+        options += '<option id ="{{ k.id_ex }}" class="option_oranization" >{{ k.name }}</option>'
+    '{% endfor %}'
+</script>
+<script type="text/javascript" src="/static/js/main/date-picker.js"></script>
+<script type="text/javascript" src="/static/js/main/arch/Filterjavascript.js"></script>
+<script type="text/javascript" src="/static/js/main/arch/javascript.js"></script>
+<script type="text/javascript" src="/static/js/main/ex/style.js"></script>
+<script type="text/javascript" src="/static/js/main/tooltipe_main.js"></script>
+{% comment %} <script type="text/javascript" src="/static/js/main/date-picker.js"></script> {% endcomment %}
+{% endblock script %}

@@ -1,0 +1,24 @@
+{% load static %}
+{% block module_content %}
+
+<div id="id_modal_profile_info" class="modal fade" role="dialog" data-keyboard="true"></div>
+
+<div id="users-list">
+    <div class="table-responsive">
+        <table class="table table-condensed table-striped table-hover">
+            <thead>
+                <tr>
+                    <th data-orderable="false">№</th>
+                    <th>Логин</th>
+                    <th>ФИО</th>
+                    <th>Организация</th>
+                    <th>Последняя активность</th>
+                    <th>Cтатус</th>
+                </tr>
+            </thead>
+        </table>
+    </div>
+    <div class="users-loading"></div>
+</div>
+
+{% endblock %}
